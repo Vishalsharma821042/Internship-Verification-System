@@ -1,0 +1,319 @@
+{
+	"info": {
+		"_postman_id": "b1b1b1b1-b1b1-b1b1-b1b1-b1b1b1b1b1b1",
+		"name": "Internship Verification System",
+		"description": "Complete API collection for the Internship Verification System.\n\n## Setup Instructions\n1. Run **1. Login (Admin)** or **2. Login (HR)** first\n2. The token is automatically saved to the collection variable `{{token}}`\n3. All protected routes use `{{token}}` automatically\n\n## Demo Credentials\n- Admin: admin@test.com / password123\n- HR: hr@test.com / password123",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "generatedCode",
+			"value": ""
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "1. Login (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.token) {",
+									"    pm.collectionVariables.set('token', res.token);",
+									"    console.log('Token saved:', res.token.substring(0, 20) + '...');",
+									"}",
+									"",
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.token).to.be.a('string');",
+									"    pm.expect(res.user.role).to.equal('admin');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@test.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2. Login (HR)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.token) {",
+									"    pm.collectionVariables.set('token', res.token);",
+									"    console.log('Token saved:', res.token.substring(0, 20) + '...');",
+									"}",
+									"",
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.token).to.be.a('string');",
+									"    pm.expect(res.user.role).to.equal('hr');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"hr@test.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3. Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "me"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Intern Verification",
+			"item": [
+				{
+					"name": "4. Generate Verification Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"if (res.success && res.verificationCode) {",
+									"    pm.collectionVariables.set('generatedCode', res.verificationCode);",
+									"    console.log('Code saved:', res.verificationCode);",
+									"}",
+									"",
+									"pm.test('Code generated successfully', function () {",
+									"    pm.response.to.have.status(201);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.verificationCode).to.be.a('string');",
+									"    pm.expect(res.verificationCode).to.have.lengthOf(10);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vishal Kumar\",\n    \"designation\": \"Data Engg\",\n    \"duration\": \"3 Month\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/intern/generate",
+							"host": ["{{baseUrl}}"],
+							"path": ["intern", "generate"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5. Verify Internship (use generated code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"pm.test('Verification successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.data.verificationCode).to.equal(pm.collectionVariables.get('generatedCode'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/intern/verify/{{generatedCode}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["intern", "verify", "{{generatedCode}}"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Verify Internship (invalid code)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"pm.test('Returns invalid code error', function () {",
+									"    pm.expect(res.success).to.be.false;",
+									"    pm.expect(res.message).to.equal('Invalid Verification Code');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/intern/verify/XXXXXXXXXX",
+							"host": ["{{baseUrl}}"],
+							"path": ["intern", "verify", "XXXXXXXXXX"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "7. Dashboard Stats",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"pm.test('Dashboard stats loaded', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.stats).to.have.property('totalInterns');",
+									"    pm.expect(res.stats).to.have.property('verifiedInterns');",
+									"    pm.expect(res.stats).to.have.property('generatedCodes');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/intern/dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["intern", "dashboard"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "8. List All Interns (Admin only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const res = pm.response.json();",
+									"",
+									"pm.test('Intern list loaded', function () {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.be.true;",
+									"    pm.expect(res.data).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/intern/list",
+							"host": ["{{baseUrl}}"],
+							"path": ["intern", "list"]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

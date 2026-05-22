@@ -1,0 +1,179 @@
+═══════════════════════════════════════════════════════════════════════════════
+  MERN PROJECT SETUP — FIX GUIDE (Windows CMD)
+═══════════════════════════════════════════════════════════════════════════════
+
+  Open CMD (Command Prompt) and run these commands IN ORDER.
+  Copy-paste ONE command at a time.
+
+═══════════════════════════════════════════════════════════════════════════════
+  WHAT WENT WRONG
+═══════════════════════════════════════════════════════════════════════════════
+
+  ❌ You typed:   node_modules/
+  ❌ You typed:   .env
+
+  These are NOT commands. They are:
+  • node_modules/ → a FOLDER containing installed packages
+  • .env          → a FILE containing environment variables
+
+  You cannot "run" a folder or a config file.
+  Windows tried to execute them as programs — that's why the error appeared.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 1 — NAVIGATE TO PROJECT ROOT
+═══════════════════════════════════════════════════════════════════════════════
+
+  d:
+  cd "D:\Utsanova Intern\Internship Verification System\Internship Verification System"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 2 — FIX GIT LINE-ENDING WARNINGS
+═══════════════════════════════════════════════════════════════════════════════
+
+  This fixes the "LF will be replaced by CRLF" warning.
+  It tells Git to automatically handle line endings on Windows.
+
+  git config --global core.autocrlf true
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 3 — INITIALIZE GIT (since you deleted .git)
+═══════════════════════════════════════════════════════════════════════════════
+
+  git init
+  git add .
+  git commit -m "Initial commit"
+
+  ✅ The .gitignore file has been created to exclude:
+     node_modules/  .env  dist/  build/
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 4 — REINSTALL SERVER DEPENDENCIES
+═══════════════════════════════════════════════════════════════════════════════
+
+  cd server
+  rmdir /s /q node_modules
+  npm install
+
+  Wait for it to finish. You should see "added XXX packages" message.
+
+  Then go back:
+  cd ..
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 5 — REINSTALL CLIENT DEPENDENCIES
+═══════════════════════════════════════════════════════════════════════════════
+
+  cd client
+  rmdir /s /q node_modules
+  npm install
+
+  Wait for it to finish. You should see "added XXX packages" message.
+
+  Then go back:
+  cd ..
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 6 — START BACKEND SERVER
+═══════════════════════════════════════════════════════════════════════════════
+
+  cd server
+  npm run dev
+
+  ✅ Expected output:
+  ═══════════════════════════════════════════════════
+    🚀 Server running in development mode on port 5000
+    📡 API: http://localhost:5000/api
+    🔐 Login: POST http://localhost:5000/api/auth/login
+  ═══════════════════════════════════════════════════
+
+  ⚠️  Keep this terminal window OPEN. Do NOT close it.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  STEP 7 — START FRONTEND (open a NEW terminal window)
+═══════════════════════════════════════════════════════════════════════════════
+
+  Open a SECOND CMD window (Win + R → cmd → Enter)
+
+  d:
+  cd "D:\Utsanova Intern\Internship Verification System\Internship Verification System\client"
+  npm run dev
+
+  ✅ Expected output:
+    VITE v5.x.x  ready in XXX ms
+    ➜  Local:   http://localhost:5173/
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  QUICK REFERENCE — CORRECT VS WRONG COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+  ┌────────────────────────┬───────────────────────────────────────┐
+  │ ❌ WRONG               │ ✅ CORRECT                            │
+  ├────────────────────────┼───────────────────────────────────────┤
+  │ node_modules/          │ dir node_modules     (list contents) │
+  │                        │ rmdir /s /q node_modules  (delete)   │
+  ├────────────────────────┼───────────────────────────────────────┤
+  │ .env                   │ type .env            (view contents) │
+  │                        │ notepad .env         (edit file)     │
+  ├────────────────────────┼───────────────────────────────────────┤
+  │ server/                │ cd server            (enter folder)  │
+  ├────────────────────────┼───────────────────────────────────────┤
+  │ client/                │ cd client            (enter folder)  │
+  └────────────────────────┴───────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  YOUR .ENV FILE (server/.env) — ALREADY CORRECT ✅
+═══════════════════════════════════════════════════════════════════════════════
+
+  NODE_ENV=development
+  PORT=5000
+  MONGO_URI=mongodb://localhost:27017/internship_verification
+  JWT_SECRET=internship_verify_jwt_secret_key_2024
+
+  ⚠️  Make sure MongoDB is running before starting the server.
+      If MongoDB is not running, the server will still start
+      but will use demo mode (in-memory data).
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  YOUR .GITIGNORE FILE — CREATED ✅
+═══════════════════════════════════════════════════════════════════════════════
+
+  Location: project root (.gitignore)
+
+  Contents:
+    node_modules/
+    .env
+    dist/
+    build/
+    .DS_Store
+    Thumbs.db
+    *.log
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  CHECKLIST — ALL FIXES
+═══════════════════════════════════════════════════════════════════════════════
+
+  [✔] node_modules/ error explained — it's a folder, not a command
+  [✔] .env error explained — it's a file, not a command
+  [✔] Git LF/CRLF fix — git config --global core.autocrlf true
+  [✔] .gitignore created — excludes node_modules, .env, dist
+  [✔] .env file already configured correctly
+  [✔] Server dependencies → npm install in server/
+  [✔] Client dependencies → npm install in client/
+  [✔] Backend start → cd server && npm run dev
+  [✔] Frontend start → cd client && npm run dev
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  END OF FIX GUIDE
+═══════════════════════════════════════════════════════════════════════════════
