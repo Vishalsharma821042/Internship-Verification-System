@@ -1,0 +1,414 @@
+═══════════════════════════════════════════════════════════════════════════════
+  INTERNSHIP VERIFICATION SYSTEM — REST API ENDPOINTS DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════
+
+  Base URL:  http://localhost:5000/api
+  Stack:     Node.js | Express.js | MongoDB + Mongoose | JWT Auth
+
+  Architecture:  MVC (Model - View - Controller)
+
+  Files:
+  ├── server.js                          → Entry point
+  ├── models/Intern.js                   → Intern Mongoose model
+  ├── models/User.js                     → User Mongoose model
+  ├── controllers/authController.js      → Auth logic (login)
+  ├── controllers/internController.js    → Intern CRUD + dashboard logic
+  ├── routes/authRoutes.js               → Auth route definitions
+  ├── routes/internRoutes.js             → Intern route definitions
+  └── middleware/auth.js                 → JWT protect & adminOnly middleware
+
+═══════════════════════════════════════════════════════════════════════════════
+
+
+═══════════════════════════════════════════════════════════════════════════════
+1. POST ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────────
+POST /api/auth/login
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Login Admin or HR user
+  Access:         Public
+  File:           controllers/authController.js → loginUser()
+  Route File:     routes/authRoutes.js
+
+  Request Headers:
+    Content-Type: application/json
+
+  Request Body:
+    {
+      "email":    "admin@test.com",
+      "password": "password123"
+    }
+
+  Success Response (200):
+    {
+      "success": true,
+      "token":   "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
+      "user": {
+        "_id":   "64a1b2c3d4e5f6a7b8c9d0e1",
+        "name":  "System Administrator",
+        "email": "admin@test.com",
+        "role":  "admin"
+      }
+    }
+
+  Error Responses:
+    400 → { "success": false, "message": "Please provide email and password" }
+    401 → { "success": false, "message": "Invalid email or password" }
+    500 → { "success": false, "message": "Server error during login" }
+
+───────────────────────────────────────────────────────────────────────────────
+POST /api/intern/generate
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Generate internship verification code and save intern data
+  Access:         Protected (HR / Admin) — JWT required
+  Middleware:     protect, validateGenerateCode
+  File:           controllers/internController.js → generateCode()
+  Route File:     routes/internRoutes.js
+
+  Request Headers:
+    Content-Type:  application/json
+    Authorization: Bearer <JWT_TOKEN>
+
+  Request Body:
+    {
+      "name":        "John Doe",
+      "designation": "Web Developer Intern",
+      "duration":    "3 Months"
+    }
+
+  Success Response (201):
+    {
+      "success":          true,
+      "message":          "Credential generated successfully",
+      "verificationCode": "A1B2C3D4E5",
+      "data": {
+        "_id":              "64a1b2c3d4e5f6a7b8c9d0e1",
+        "name":             "John Doe",
+        "designation":      "Web Developer Intern",
+        "duration":         "3 Months",
+        "verificationCode": "A1B2C3D4E5",
+        "createdAt":        "2026-05-22T05:30:00.000Z"
+      }
+    }
+
+  Error Responses:
+    400 → { "success": false, "message": "All fields are required" }
+    401 → { "success": false, "message": "Not authorized, no token" }
+
+
+═══════════════════════════════════════════════════════════════════════════════
+2. GET ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────────
+GET /api/intern/dashboard
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Get dashboard statistics
+  Access:         Protected (HR / Admin) — JWT required
+  Middleware:     protect
+  File:           controllers/internController.js → getDashboardStats()
+  Route File:     routes/internRoutes.js
+
+  Request Headers:
+    Authorization: Bearer <JWT_TOKEN>
+
+  Success Response (200):
+    {
+      "success": true,
+      "stats": {
+        "totalInterns":    25,
+        "verifiedInterns": 25,
+        "generatedCodes":  25
+      },
+      "recentCodes": [
+        {
+          "_id":              "64a1b2c3d4e5f6a7b8c9d0e1",
+          "name":             "John Doe",
+          "designation":      "Web Developer Intern",
+          "duration":         "3 Months",
+          "verificationCode": "A1B2C3D4E5",
+          "createdAt":        "2026-05-22T05:30:00.000Z"
+        }
+      ]
+    }
+
+  Error Responses:
+    401 → { "success": false, "message": "Not authorized, no token" }
+
+───────────────────────────────────────────────────────────────────────────────
+GET /api/intern/list
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Get all interns list
+  Access:         Protected (Admin only) — JWT required
+  Middleware:     protect, adminOnly
+  File:           controllers/internController.js → getAllInterns()
+  Route File:     routes/internRoutes.js
+
+  Request Headers:
+    Authorization: Bearer <JWT_TOKEN>
+
+  Success Response (200):
+    {
+      "success": true,
+      "count":   2,
+      "data": [
+        {
+          "_id":              "64a1b2c3d4e5f6a7b8c9d0e1",
+          "name":             "John Doe",
+          "designation":      "Web Developer Intern",
+          "duration":         "3 Months",
+          "verificationCode": "A1B2C3D4E5",
+          "createdAt":        "2026-05-22T05:30:00.000Z"
+        },
+        {
+          "_id":              "64a1b2c3d4e5f6a7b8c9d0e2",
+          "name":             "Jane Smith",
+          "designation":      "UI/UX Intern",
+          "duration":         "6 Months",
+          "verificationCode": "F6G7H8I9J0",
+          "createdAt":        "2026-05-21T10:00:00.000Z"
+        }
+      ]
+    }
+
+  Error Responses:
+    401 → { "success": false, "message": "Not authorized, no token" }
+    403 → { "success": false, "message": "Not authorized as admin" }
+
+───────────────────────────────────────────────────────────────────────────────
+GET /api/intern/verify/:code
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Verify internship using verification code
+  Access:         Public (no token needed)
+  File:           controllers/internController.js → verifyIntern()
+  Route File:     routes/internRoutes.js
+
+  URL Parameter:
+    :code → 10-character alphanumeric verification code
+
+  Example:
+    GET /api/intern/verify/A1B2C3D4E5
+
+  Success Response (200):
+    {
+      "success": true,
+      "data": {
+        "name":             "John Doe",
+        "designation":      "Web Developer Intern",
+        "duration":         "3 Months",
+        "verificationCode": "A1B2C3D4E5",
+        "createdAt":        "2026-05-22T05:30:00.000Z"
+      }
+    }
+
+  Error Responses:
+    400 → { "success": false, "message": "Invalid Verification Code" }
+    404 → { "success": false, "message": "Invalid Verification Code" }
+    500 → { "success": false, "message": "Server Error" }
+
+───────────────────────────────────────────────────────────────────────────────
+GET /api/intern/:id
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Get single intern details
+  Access:         Protected (HR / Admin) — JWT required
+  Middleware:     protect
+  File:           controllers/internController.js → getInternById()
+  Route File:     routes/internRoutes.js
+
+  URL Parameter:
+    :id → MongoDB ObjectId of the intern
+
+  Example:
+    GET /api/intern/64a1b2c3d4e5f6a7b8c9d0e1
+
+  Request Headers:
+    Authorization: Bearer <JWT_TOKEN>
+
+  Success Response (200):
+    {
+      "success": true,
+      "data": {
+        "_id":              "64a1b2c3d4e5f6a7b8c9d0e1",
+        "name":             "John Doe",
+        "designation":      "Web Developer Intern",
+        "duration":         "3 Months",
+        "verificationCode": "A1B2C3D4E5",
+        "createdAt":        "2026-05-22T05:30:00.000Z"
+      }
+    }
+
+  Error Responses:
+    401 → { "success": false, "message": "Not authorized, no token" }
+    404 → { "success": false, "message": "Intern record not found" }
+    500 → { "success": false, "message": "Server Error" }
+
+
+═══════════════════════════════════════════════════════════════════════════════
+3. PUT ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────────
+PUT /api/intern/:id
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Update intern details
+  Access:         Protected (Admin only) — JWT required
+  Middleware:     protect, adminOnly
+  File:           controllers/internController.js → updateIntern()
+  Route File:     routes/internRoutes.js
+
+  URL Parameter:
+    :id → MongoDB ObjectId of the intern
+
+  Example:
+    PUT /api/intern/64a1b2c3d4e5f6a7b8c9d0e1
+
+  Request Headers:
+    Content-Type:  application/json
+    Authorization: Bearer <JWT_TOKEN>
+
+  Request Body (send one or more fields):
+    {
+      "name":        "John Doe Updated",
+      "designation": "Full Stack Developer Intern",
+      "duration":    "6 Months"
+    }
+
+  Success Response (200):
+    {
+      "success": true,
+      "message": "Intern record updated successfully",
+      "data": {
+        "_id":              "64a1b2c3d4e5f6a7b8c9d0e1",
+        "name":             "John Doe Updated",
+        "designation":      "Full Stack Developer Intern",
+        "duration":         "6 Months",
+        "verificationCode": "A1B2C3D4E5",
+        "createdAt":        "2026-05-22T05:30:00.000Z"
+      }
+    }
+
+  Error Responses:
+    400 → { "success": false, "message": "Please provide at least one field to update" }
+    401 → { "success": false, "message": "Not authorized, no token" }
+    403 → { "success": false, "message": "Not authorized as admin" }
+    404 → { "success": false, "message": "Intern record not found" }
+    500 → { "success": false, "message": "Server Error" }
+
+
+═══════════════════════════════════════════════════════════════════════════════
+4. DELETE ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────────────────────
+DELETE /api/intern/:id
+───────────────────────────────────────────────────────────────────────────────
+
+  Description:    Delete intern record
+  Access:         Protected (Admin only) — JWT required
+  Middleware:     protect, adminOnly
+  File:           controllers/internController.js → deleteIntern()
+  Route File:     routes/internRoutes.js
+
+  URL Parameter:
+    :id → MongoDB ObjectId of the intern
+
+  Example:
+    DELETE /api/intern/64a1b2c3d4e5f6a7b8c9d0e1
+
+  Request Headers:
+    Authorization: Bearer <JWT_TOKEN>
+
+  Success Response (200):
+    {
+      "success": true,
+      "message": "Intern record deleted successfully"
+    }
+
+  Error Responses:
+    401 → { "success": false, "message": "Not authorized, no token" }
+    403 → { "success": false, "message": "Not authorized as admin" }
+    404 → { "success": false, "message": "Intern record not found" }
+    500 → { "success": false, "message": "Server Error" }
+
+
+═══════════════════════════════════════════════════════════════════════════════
+AUTHENTICATION — HOW JWT WORKS
+═══════════════════════════════════════════════════════════════════════════════
+
+  1. Call POST /api/auth/login with email & password
+  2. Receive a JWT token in the response
+  3. For protected routes, include the token in the Authorization header:
+
+     Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
+
+  Middleware:
+  ├── protect     → Verifies JWT token and attaches user to req.user
+  └── adminOnly   → Checks if req.user.role === 'admin'
+
+  Route Protection Summary:
+  ┌─────────────────────────────┬──────────┬──────────────────┐
+  │ Endpoint                    │ Method   │ Access           │
+  ├─────────────────────────────┼──────────┼──────────────────┤
+  │ /api/auth/login             │ POST     │ Public           │
+  │ /api/intern/generate        │ POST     │ Protected (JWT)  │
+  │ /api/intern/dashboard       │ GET      │ Protected (JWT)  │
+  │ /api/intern/list            │ GET      │ Admin Only       │
+  │ /api/intern/verify/:code    │ GET      │ Public           │
+  │ /api/intern/:id             │ GET      │ Protected (JWT)  │
+  │ /api/intern/:id             │ PUT      │ Admin Only       │
+  │ /api/intern/:id             │ DELETE   │ Admin Only       │
+  └─────────────────────────────┴──────────┴──────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+HTTP STATUS CODES USED
+═══════════════════════════════════════════════════════════════════════════════
+
+  200 → OK (Successful GET, PUT, DELETE)
+  201 → Created (Successful POST — intern generated)
+  400 → Bad Request (Missing/invalid fields)
+  401 → Unauthorized (Missing or invalid JWT token)
+  403 → Forbidden (Not admin — insufficient role)
+  404 → Not Found (Intern record or verification code not found)
+  500 → Internal Server Error (Unexpected server failure)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+MONGOOSE MODELS
+═══════════════════════════════════════════════════════════════════════════════
+
+  Intern Model (models/Intern.js):
+  ┌────────────────────┬──────────┬──────────────────────────────────┐
+  │ Field              │ Type     │ Notes                            │
+  ├────────────────────┼──────────┼──────────────────────────────────┤
+  │ name               │ String   │ Required, trimmed                │
+  │ designation        │ String   │ Required, trimmed                │
+  │ duration           │ String   │ Required, trimmed                │
+  │ verificationCode   │ String   │ Required, unique, indexed        │
+  │ createdAt          │ Date     │ Default: Date.now                │
+  └────────────────────┴──────────┴──────────────────────────────────┘
+
+  User Model (models/User.js):
+  ┌────────────────────┬──────────┬──────────────────────────────────┐
+  │ Field              │ Type     │ Notes                            │
+  ├────────────────────┼──────────┼──────────────────────────────────┤
+  │ name               │ String   │ Required                         │
+  │ email              │ String   │ Required, unique                 │
+  │ password           │ String   │ Required, hashed with bcryptjs   │
+  │ role               │ String   │ Enum: ['admin', 'hr'], def: 'hr' │
+  │ createdAt          │ Date     │ Default: Date.now                │
+  └────────────────────┴──────────┴──────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  END OF DOCUMENTATION
+═══════════════════════════════════════════════════════════════════════════════

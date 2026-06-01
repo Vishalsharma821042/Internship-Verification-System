@@ -64,7 +64,7 @@ const generateCode = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: 'Credential generated successfully',
+        message: 'Verification code generated successfully',
         verificationCode: newIntern.verificationCode,
         data: {
           _id: newIntern._id,
@@ -103,7 +103,7 @@ const generateCode = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Credential generated successfully',
+      message: 'Verification code generated successfully',
       verificationCode: code,
       data: {
         _id: demoIntern._id,
@@ -124,7 +124,7 @@ const generateCode = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: 'Credential generated successfully',
+      message: 'Verification code generated successfully',
       verificationCode: fallbackCode,
       data: null
     });
@@ -189,7 +189,7 @@ const verifyIntern = async (req, res) => {
     console.error('[Verify] ❌ Error:', error.message);
     return res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: 'Internal server error'
     });
   }
 };
@@ -217,15 +217,14 @@ const getAllInterns = async (req, res) => {
     return res.status(200).json({
       success: true,
       count: interns.length,
-      data: interns
+      interns
     });
 
   } catch (error) {
     console.error('[List] ❌ Error:', error.message);
-    return res.status(200).json({
-      success: true,
-      count: demoInterns.length,
-      data: demoInterns
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch interns'
     });
   }
 };
@@ -278,7 +277,7 @@ const getInternById = async (req, res) => {
     console.error('[GetById] ❌ Error:', error.message);
     return res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: 'Internal server error'
     });
   }
 };
@@ -329,7 +328,7 @@ const updateIntern = async (req, res) => {
 
       return res.status(200).json({
         success: true,
-        message: 'Intern record updated successfully',
+        message: 'Intern updated successfully',
         data: {
           _id: intern._id,
           name: intern.name,
@@ -362,7 +361,7 @@ const updateIntern = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Intern record updated successfully',
+      message: 'Intern updated successfully',
       data: {
         _id: updated._id,
         name: updated.name,
@@ -377,7 +376,7 @@ const updateIntern = async (req, res) => {
     console.error('[Update] ❌ Error:', error.message);
     return res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: 'Internal server error'
     });
   }
 };
@@ -466,7 +465,7 @@ const deleteIntern = async (req, res) => {
       console.log('[Delete] ✅ Intern deleted from MongoDB:', intern.name);
       return res.status(200).json({
         success: true,
-        message: 'Intern record deleted successfully'
+        message: 'Intern deleted successfully'
       });
     }
 
@@ -482,18 +481,18 @@ const deleteIntern = async (req, res) => {
     }
 
     const deleted = demoInterns.splice(index, 1)[0];
-    console.log('[Delete] ✅ Intern deleted from demo storage:', deleted.name);
+    console.log('[Delete] ✅ Intern deleted successfully');
 
     return res.status(200).json({
       success: true,
-      message: 'Intern record deleted successfully'
+      message: 'Intern deleted successfully'
     });
 
   } catch (error) {
     console.error('[Delete] ❌ Error:', error.message);
     return res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: 'Internal server error'
     });
   }
 };

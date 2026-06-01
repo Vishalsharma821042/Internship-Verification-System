@@ -108,8 +108,9 @@ const loginUser = async (req, res) => {
       const isMatch = await user.matchPassword(password);
       if (isMatch) {
         console.log('   ✅ Login successful (database user)');
-        return res.json({
+        return res.status(200).json({
           success: true,
+          message: 'Login successful',
           token: generateToken(user._id),
           user: {
             _id: user._id,
@@ -128,8 +129,9 @@ const loginUser = async (req, res) => {
     const demoUser = DEMO_USERS.find(u => u.email === email && u.password === password);
     if (demoUser) {
       console.log('   ✅ Login successful (demo credentials)');
-      return res.json({
+      return res.status(200).json({
         success: true,
+        message: 'Login successful',
         token: generateToken(demoUser._id),
         user: {
           _id: demoUser._id,
